@@ -4,9 +4,27 @@ Web-based port of GTA: Vice City running in browser via WebAssembly.
 
 ## Requirements
 
-- Python 3.8+
+- Docker or Python 3.8+ or PHP 8.0+
 - Dependencies from `requirements.txt`
 
+## Quick Start
+
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/Lolendor/reVCDOS.git
+    cd reVCDOS
+    ```
+
+2. **Configure Assets** (Optional):
+
+   By default, the project uses the **DOS Zone CDN**. For local hosting, download and place assets in [(see structure)](#project-structure):
+    *   **Resources:** `vcsky/fetched/` (or `fetched-ru/`) — `data`, `audio`, `anim`, `models` folders.
+    *   **Binaries:** `vcbr/` — `.wasm.br` and `.data.br` files for your chosen language.
+4. **Launch the Application**:
+   Choose one of the setup methods below:
+   * **Docker** (Recommended for most users) — fast and isolated.
+   * **PHP** — Simply upload the folder to your web server (FTP/Hosting).
+   * **Manual Installation** — for development and customization.
 
 ## Setup & Running
 
@@ -51,6 +69,10 @@ python server.py
 
 Server starts at `http://localhost:8000`
 
+### Option 3: Shared Hosting on PHP (No installation)
+
+If you want to run the game from a hosted environment with `PHP 8.0` or above, just copy the contents of this repo to your desired hosting
+By default the `index.php` and `.htaccess` will get the job done. 
 ## Server Options
 
 | Option | Type | Default | Description |
@@ -96,6 +118,7 @@ python server.py --port 3000 --custom_saves --login admin --password secret123 -
 | `lang` | `en`, `ru` | Game language |
 | `cheats` | `1` | Enable cheat menu (F3) |
 
+
 **Examples:**
 - `http://localhost:8000/?lang=ru` — Russian version
 - `http://localhost:8000/?lang=en&cheats=1` — English + cheats
@@ -104,6 +127,8 @@ python server.py --port 3000 --custom_saves --login admin --password secret123 -
 
 ```
 ├── server.py           # FastAPI proxy server
+├── index.php           # php proxy server
+├── .htaccess           # apache config for php
 ├── requirements.txt    # Python dependencies
 ├── additions/          # Server extensions
 │   ├── auth.py         # HTTP Basic Auth middleware
@@ -138,11 +163,16 @@ python server.py --port 3000 --custom_saves --login admin --password secret123 -
 │   ├── vc-sky-en-v6.wasm.br
 │   ├── vc-sky-ru-v6.data.br
 │   └── vc-sky-ru-v6.wasm.br
-└── vcsky/              # Additional assets (optional)
-    ├── data/
-    ├── audio/
-    ├── models/
-    └── anim/
+└── vcsky/                 # Decompressed assets
+    ├── fetched/           # English version files
+    │   ├── data/
+    │   ├── audio/
+    │   ├── models/
+    │   └── anim/
+    └── fetched-ru/        # Russian version files
+        ├── data/
+        ├── audio/
+        └── ...
 ```
 
 ## Features
