@@ -1,5 +1,5 @@
 services:
-  reVCDOS:
+  revcdos:
     hostname: reVCDOS
     build:
       context: .
