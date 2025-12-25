@@ -1,10 +1,14 @@
 # GTA Vice City — HTML5 Port (DOS Zone)
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13GFRIxTwVbixv0Vup9MSVXnB4SLmA3G7?usp=sharing)
+
+> **Fast Start:** Run the server in one click using Google Colab. Click the badge above, run the cell, and use the **"Launch Game"** button. The tunnel password will be copied automatically — just paste it on the page that opens.
+
 Web-based port of GTA: Vice City running in browser via WebAssembly.
 
 ## Requirements
 
-- Docker or Python 3.8+ or PHP 8.0+
+- Colab or Docker or Python 3.8+ or PHP 8.0+
 - Dependencies from `requirements.txt`
 
 ## Quick Start
