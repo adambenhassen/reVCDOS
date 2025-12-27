@@ -20,8 +20,11 @@ Play GTA: Vice City directly in your browser via WebAssembly! 🌴
 
 ## ⚡ Quick Start
 
-1. Download the latest release from the [Releases page](https://github.com/adambenhassen/reVCDOS/releases)
-2. Extract and run the executable
+1. Download the latest release for your platform from the [Releases page](https://github.com/adambenhassen/reVCDOS/releases):
+   - **macOS:** `server-darwin-arm64` (Apple Silicon) or `server-darwin-amd64` (Intel)
+   - **Linux:** `server-linux-arm64` or `server-linux-amd64`
+   - **Windows:** `server-windows-arm64.exe` or `server-windows-amd64.exe`
+2. Run the executable
 3. Open 👉 **http://localhost:8000**
 
 ---
@@ -51,13 +54,7 @@ AUTH_LOGIN=admin AUTH_PASSWORD=secret docker compose up -d --build
 
 ---
 
-## 🖥️ Go Server
-
-```bash
-go run server.go
-```
-
-### 🎛️ Command Line Options
+## 🎛️ Command Line Options
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -70,15 +67,13 @@ go run server.go
 | `-download-cache` | — | Download assets in background while serving |
 | `-workers` | `8` | Parallel download threads |
 
-**Examples:**
+**Examples** (replace `server` with your downloaded binary name):
 ```bash
-go run server.go -port 3000                    # Custom port
-go run server.go -login admin -password 123    # Enable auth
-go run server.go -download                     # Offline mode setup
-go run server.go -download-cache               # Background download
+./server -port 3000                    # Custom port
+./server -login admin -password 123    # Enable auth
+./server -download                     # Offline mode setup
+./server -download-cache               # Background download
 ```
-
-> 💡 **Tip:** Build a single binary with `go build -o server server.go`
 
 ---
 
@@ -118,10 +113,10 @@ Touch controls appear automatically on mobile devices:
 
 ## 📴 Offline Setup
 
-Download all assets for fully offline play:
+Download all assets for fully offline play (replace `server` with your binary name):
 
 ```bash
-go run server.go -download
+./server -download
 ```
 
 This fetches:
@@ -129,6 +124,17 @@ This fetches:
 - 🔊 ~9,940 sound effects (~50MB)
 
 Assets are cached in the OS temp folder (or custom `-dir` path) for future use.
+
+---
+
+## 🔨 Build from Source
+
+```bash
+git clone https://github.com/adambenhassen/reVCDOS.git
+cd reVCDOS
+go build -o server server.go
+./server
+```
 
 ---
 
