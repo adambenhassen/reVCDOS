@@ -20,14 +20,9 @@ Play GTA: Vice City directly in your browser via WebAssembly! 🌴
 
 ## ⚡ Quick Start
 
-```bash
-# Clone & run
-git clone https://github.com/adambenhassen/reVCDOS.git
-cd reVCDOS
-go run server.go
-```
-
-Then open 👉 **http://localhost:8000**
+1. Download the latest release from the [Releases page](https://github.com/adambenhassen/reVCDOS/releases)
+2. Extract and run the executable
+3. Open 👉 **http://localhost:8000**
 
 ---
 
