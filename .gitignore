@@ -2,3 +2,4 @@
 vcsky/
 saves/
 /.*
+!/.github
