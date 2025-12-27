@@ -1,169 +1,165 @@
-# GTA Vice City — HTML5 Port (DOS Zone)
+# 🎮 GTA Vice City — HTML5 Browser Port
 
-Web-based port of GTA: Vice City running in browser via WebAssembly.
+Play GTA: Vice City directly in your browser via WebAssembly! 🌴
 
-> **Fast Start:** `go run server.go` or `docker compose up -d --build`  then open http://localhost:8000
+---
 
-## Requirements
+## ✨ Features
 
-- Docker (recommended) or Go 1.25+
+- 🌐 Runs entirely in your browser (WebAssembly)
+- 💾 No installation required
+- 🚀 Easy setup
+- 🎮 Gamepad support + touch emulation
+- 📱 Mobile-friendly controls
+- 🔧 Built-in cheats & memory scanner
+- 📴 Offline play support
+- 🌍 Multi-language support
+- ⚡ CDN-backed asset streaming with local caching
 
-## Quick Start
+---
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/adambenhassen/reVCDOS.git
-    cd reVCDOS
-    ```
+## ⚡ Quick Start
 
-2. **Configure Assets** (Optional):
+```bash
+# Clone & run
+git clone https://github.com/adambenhassen/reVCDOS.git
+cd reVCDOS
+go run server.go
+```
 
-   By default, the project uses the **DOS Zone CDN**. For fully offline/local hosting, see [Offline Setup](#offline-setup) below.
-4. **Launch the Application**:
-   Choose one of the setup methods below:
-   * **Docker** (Recommended for most users) — fast and isolated.
-   * **Go** — Single binary, no dependencies.
+Then open 👉 **http://localhost:8000**
 
-## Setup & Running
+---
 
-### Option 1: Using Docker (Recommended)
-The easiest way to get started is using Docker Compose:
+## 🐳 Docker (Recommended)
 
 ```bash
 docker compose up -d --build
 ```
 
-To configure server options via environment variables:
+### 🔧 Environment Variables
 
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `8000` | Server port |
+| `AUTH_LOGIN` | — | Username for Basic Auth |
+| `AUTH_PASSWORD` | — | Password for Basic Auth |
+| `CDN` | `https://cdn.dos.zone/vcsky/` | Asset CDN URL |
+| `DOWNLOAD_CACHE` | `false` | Pre-download assets on startup (`1` or `true`) |
+| `WORKERS` | `8` | Parallel download threads |
+
+**Example with auth:**
 ```bash
-# Enable auth and pre-download all assets
-AUTH_LOGIN=admin AUTH_PASSWORD=secret DOWNLOAD_CACHE=1 docker compose up -d --build
+AUTH_LOGIN=admin AUTH_PASSWORD=secret docker compose up -d --build
 ```
 
-| Environment Variable | Description |
-|---------------------|-------------|
-| `PORT` | Server port (default: 8000) |
-| `AUTH_LOGIN` | HTTP Basic Auth username |
-| `AUTH_PASSWORD` | HTTP Basic Auth password |
-| `CDN` | Custom CDN base URL (default: `https://cdn.dos.zone/vcsky/`) |
-| `DOWNLOAD_CACHE` | Download all assets in background on startup (set to `1` or `true`) |
-| `WORKERS` | Number of parallel download workers (default: 8) |
+---
 
-### Option 2: Go Server (Recommended for local)
+## 🖥️ Go Server
 
 ```bash
 go run server.go
 ```
 
-Server starts at `http://localhost:8000`. Assets are proxied from CDN and cached locally.
+### 🎛️ Command Line Options
 
-> **Note:** Use `go build -o server-go server.go` to create a single binary with all assets embedded.
-
-## Server Options (Go)
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `-port` | int | 8000 | Server port |
-| `-login` | string | none | HTTP Basic Auth username |
-| `-password` | string | none | HTTP Basic Auth password |
-| `-cdn` | string | `https://cdn.dos.zone/vcsky/` | CDN base URL |
-| `-download` | flag | disabled | Download all assets and exit |
-| `-download-cache` | flag | disabled | Download all assets in background while serving |
-| `-workers` | int | 8 | Number of parallel download workers |
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-port` | `8000` | Server port |
+| `-login` | — | Basic Auth username |
+| `-password` | — | Basic Auth password |
+| `-cdn` | `https://cdn.dos.zone/vcsky/` | Asset CDN URL |
+| `-download` | — | Download all assets and exit |
+| `-download-cache` | — | Download assets in background while serving |
+| `-workers` | `8` | Parallel download threads |
 
 **Examples:**
 ```bash
-# Start on custom port
-go run server.go -port 3000
-
-# Enable HTTP Basic Authentication
-go run server.go -login admin -password secret123
-
-# Download all assets for offline use
-go run server.go -download
-
-# Start server and download assets in background
-go run server.go -download-cache
-
-# Use custom CDN
-go run server.go -cdn https://my-cdn.example.com/vcsky/
+go run server.go -port 3000                    # Custom port
+go run server.go -login admin -password 123    # Enable auth
+go run server.go -download                     # Offline mode setup
+go run server.go -download-cache               # Background download
 ```
 
-> **Note:** HTTP Basic Auth is only enabled when both `-login` and `-password` are provided.
+> 💡 **Tip:** Build a single binary with `go build -o server server.go`
 
-> **Note:** Assets are proxied from CDN and cached locally in `vcsky/` directory. Use `-download` to pre-download all assets for fully offline play.
+---
 
-## URL Parameters
+## 🔗 URL Parameters
+
+Customize gameplay by adding these to the URL:
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
 | `lang` | `en` | Game language |
 | `cheats` | `1` | Enable cheat menu (F3) |
-| `request_original_game` | `1` | Request original game files before play |
 | `fullscreen` | `0` | Disable auto-fullscreen |
-| `max_fps` | `1-240` | Limit frame rate (e.g., `60` for 60 FPS) |
+| `max_fps` | `1-240` | Limit frame rate |
+| `request_original_game` | `1` | Prompt for original game files |
 
-
-**Example:**
-- `http://localhost:8000/?lang=en&cheats=1` — English + cheats
-
-## Project Structure
-
-```
-├── server.go           # Go HTTP server
-├── dist/               # Game client files (embedded in Go binary)
-│   ├── index.html      # Main page
-│   ├── game.js         # Game loader
-│   ├── streaming_files.txt  # List of streaming assets
-│   └── modules/        # WASM modules
-└── vcsky/              # Cached assets (created automatically)
-    └── fetched/        # Streaming assets from CDN
-        ├── models/
-        │   └── gta3.img/   # 4310 model/texture files
-        └── audio/
-            └── sfx.raw/    # 0.mp3 - 9940.mp3 sound effects
-```
-
-## Features
-
-- Gamepad emulation for touch devices
-- Cloud saves via js-dos key
-- English/Russian language support
-- Built-in cheat engine (memory scanner, cheats)
-- Mobile touch controls
-
-## Controls (Touch)
-
-Touch controls appear automatically on mobile devices. Virtual joysticks for movement and camera, context-sensitive action buttons.
-
-## Cheats
-
-Enable with `?cheats=1`, press **F3** to open menu:
-- Memory scanner (find/edit values)
-- All classic GTA VC cheats
-- AirBreak (noclip mode)
-
-## Offline Setup
-
-For fully offline play without CDN dependency, download all assets using the `-download` flag:
-
-```bash
-# Build and download all assets
-go run server.go -download
-```
-
-This downloads:
-- ~4310 model/texture files (~150MB)
-- ~9940 sound effect files (~50MB)
-
-Assets are cached in `vcsky/fetched/` and served locally on subsequent requests.
-
-## License
-
-MIT.
+**Example:** `http://localhost:8000/?lang=en&cheats=1`
 
 ---
 
+## 🕹️ Cheats
+
+Add `?cheats=1` to URL, then press **F3** to open the cheat menu:
+
+- 🔍 Memory scanner (find & edit values)
+- 🎯 All classic GTA VC cheats
+- 👻 AirBreak (noclip mode)
+
+---
+
+## 📱 Mobile Controls
+
+Touch controls appear automatically on mobile devices:
+- Virtual joysticks for movement & camera
+- Context-sensitive action buttons
+
+---
+
+## 📴 Offline Setup
+
+Download all assets for fully offline play:
+
+```bash
+go run server.go -download
+```
+
+This fetches:
+- 📦 ~4,310 model/texture files (~150MB)
+- 🔊 ~9,940 sound effects (~50MB)
+
+Assets are cached in `vcsky/fetched/` for future use.
+
+---
+
+## 📁 Project Structure
+
+```
+├── server.go              # 🖥️ Go HTTP server
+├── dist/                  # 🎮 Game client files
+│   ├── index.html         # Main page
+│   ├── game.js            # Game loader
+│   ├── streaming_files.txt
+│   └── modules/           # WASM modules
+└── vcsky/                 # 📦 Cached assets (auto-created)
+    └── fetched/
+        ├── models/gta3.img/
+        └── audio/sfx.raw/
+```
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+## 👥 Credits
+
 **Authors:** DOS Zone ([@specialist003](https://github.com/okhmanyuk-ev), [@caiiiycuk](https://www.youtube.com/caiiiycuk), [@SerGen](https://t.me/ser_var))
 
-**Deobfuscated by**: [@Lolendor](https://github.com/Lolendor)
+**Contributors:** [@Lolendor](https://github.com/Lolendor)
