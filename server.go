@@ -684,6 +684,13 @@ func doDownloadAudio() error {
 		return err
 	}
 
+	// Misc audio files
+	miscAudio := []string{"water.mp3"}
+	log.Printf("Downloading %d misc audio files...", len(miscAudio))
+	if err := downloadWithWorkers(miscAudio, baseURL, outputDir, "misc audio"); err != nil {
+		return err
+	}
+
 	// SFX files (0-9940)
 	var sfxFiles []string
 	for i := 0; i <= 9940; i++ {
