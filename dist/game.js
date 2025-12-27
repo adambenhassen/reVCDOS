@@ -17,10 +17,9 @@ const autoFullScreen = params.get('fullscreen') !== "0";
 const cheatsEnabled = params.get('cheats') === "1"
 
 // full game access
-if (params.get('request_original_game') !== "1")
-    localStorage.setItem('vcsky.haveOriginalGame', 'true');
+localStorage.setItem('vcsky.haveOriginalGame', 'true');
 
-const maxFPS = parseInt(params.get('max_fps')) || 0;
+let maxFPS = parseInt(params.get('max_fps')) || 30;
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let isTouch = isMobile && window.matchMedia('(pointer: coarse)').matches;
@@ -29,7 +28,7 @@ document.body.dataset.isTouch = isTouch ? 1 : 0;
 
 const dataSize = 130 * 1024 * 1024;
 const textDecoder = new TextDecoder();
-let haveOriginalGame = false;
+let haveOriginalGame = true;
 (function () {
     const translations = {
         en: {
@@ -100,18 +99,12 @@ let haveOriginalGame = false;
 })();
 
 if (params.get('lang') === 'ru') {
-    data_content = `${replaceBR}vc-sky-ru-v6.data.br`;
-    wasm_content = `${replaceBR}vc-sky-ru-v6.wasm.br`;
-// } else if (params.get('lang') === 'ru') {
-//     data_content = `${replaceBR}vc-sky-ru-v6.data.br`;
-//     wasm_content = `${replaceBR}vc-sky-ru-v6.wasm.br`;
+    data_content = `/vcsky/vc-sky-ru-v6.data`;
+    wasm_content = `/vcsky/vc-sky-ru-v6.wasm`;
 } else {
-    data_content = `${replaceBR}vc-sky-en-v6.data.br`;
-    wasm_content = `${replaceBR}vc-sky-en-v6.wasm.br`;
-//     data_content = "index.old.data";
+    data_content = `/vcsky/vc-sky-en-v6.data`;
+    wasm_content = `/vcsky/vc-sky-en-v6.wasm`;
 }
-// data_content = `${replaceBR}vc-sky-ru-v6.data.br`;
-// wasm_content = `${replaceBR}vc-sky-ru-v6.wasm.br`;
 
 async function loadData() {
     let cache;
@@ -160,9 +153,13 @@ async function loadData() {
 async function startGame(e) {
     e.stopPropagation();
 
+    // Read FPS from input
+    const fpsInput = document.getElementById('fps-input');
+    if (fpsInput) {
+        maxFPS = parseInt(fpsInput.value) || 30;
+    }
+
     document.querySelector('.start-container').style.display = 'none';
-    document.querySelector('.disclaimer').style.display = 'none';
-    document.querySelector('.developed-by').style.display = 'none';
 
     const intro = document.querySelector('.intro');
     const introContainer = document.querySelector('.intro-container');
@@ -520,85 +517,7 @@ if (localStorage.getItem('vcsky.key')) {
 }
 
 const clickToPlayButton = document.getElementById('click-to-play-button');
-clickToPlayButton.textContent = t('clickToPlayDemo');
-clickToPlayButton.classList.add('disabled');
-const demoOffDisclaimer = document.getElementById('demo-off-disclaimer');
-demoOffDisclaimer.textContent = "* " +t('demoOffDisclaimer');
-const cloudSavesLink = document.getElementById('cloud-saves-link');
-cloudSavesLink.textContent = t('cloudSaves');
-cloudSavesStatus.textContent = t('enterKey');
-const playDemoText = document.getElementById('play-demo-text');
-playDemoText.textContent = t('playDemoText');
-const disclaimerText = document.getElementById('disclaimer-text');
-disclaimerText.textContent = t('disclaimer');
-const disclaimerSources = document.getElementById('disclaimer-sources');
-disclaimerSources.textContent = t('disclaimerSources');
-const disclaimerCheckboxLabel = document.getElementById('disclaimer-checkbox-label');
-disclaimerCheckboxLabel.textContent = t('disclaimerCheckbox');
-const disclaimerCheckbox = document.getElementById('disclaimer-checkbox');
-const originalGameFile = document.getElementById('original-game-file');
-const developedBy = document.querySelector('.developed-by');
-developedBy.innerHTML += t('ruTranslate');
-const portBy = document.getElementById('port-by');
-portBy.textContent = t('portBy');
-
-
-function ownerShipConfirmed() {
-    localStorage.setItem('vcsky.haveOriginalGame', 'true');
-    disclaimerCheckbox.checked = true;
-    clickToPlayButton.textContent = t('clickToPlayFull');
-    demoOffDisclaimer.textContent = "";
-    clickToPlayButton.classList.remove('disabled');
-    haveOriginalGame = true;
-};
-
-function ownerShipNotConfirmed() {
-    localStorage.removeItem('vcsky.haveOriginalGame');
-    disclaimerCheckbox.checked = false;
-    clickToPlayButton.textContent = t('clickToPlayDemo');
-    demoOffDisclaimer.textContent = "* " +t('demoOffDisclaimer');
-    haveOriginalGame = false;
-    clickToPlayButton.classList.add('disabled');
-};
-
-disclaimerCheckbox.addEventListener('change', async (inputEvent) => {
-    if (inputEvent.target.checked) {
-        if (confirm(t('disclaimerPrompt'))) {
-            originalGameFile.addEventListener('change', async (e) => {
-                try {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const sha256sums = (await (await fetch(replaceFetch("https://cdn.dos.zone/vcsky/sha256sums.txt"))).text()).toLowerCase();
-                        const arrayBuffer = await file.arrayBuffer();
-                        if (window.crypto && window.crypto.subtle) {
-                            const hashBuffer = await window.crypto.subtle.digest('SHA-256', arrayBuffer);
-                            const hashArray = Array.from(new Uint8Array(hashBuffer));
-                            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                            if (sha256sums.indexOf(hashHex) !== -1) {
-                                ownerShipConfirmed();
-                            } else {
-                                ownerShipNotConfirmed();
-                            }
-                        } else {
-                            ownerShipNotConfirmed();
-                        }
-                    } else {
-                        ownerShipNotConfirmed();
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    ownerShipNotConfirmed();
-                }
-            }, { once: true });
-            originalGameFile.click();
-            return;
-        }
-    }
-
-    ownerShipNotConfirmed();
-});
-
-localStorage.getItem('vcsky.haveOriginalGame') === 'true' ? ownerShipConfirmed() : ownerShipNotConfirmed();
+clickToPlayButton.textContent = t('clickToPlayFull');
 
 function showWasted() {
     const wastedContainer = document.querySelector('.wasted-container');

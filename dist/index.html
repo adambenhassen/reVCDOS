@@ -130,6 +130,16 @@
             outline: none;
         }
 
+        .fps-setting {
+            margin-top: 1em;
+            color: #8975c3;
+        }
+
+        .fps-setting input {
+            width: 60px;
+            text-align: center;
+        }
+
         input {
             padding: .5em 1em;
         }
@@ -171,15 +181,6 @@
             align-items: center;
         }
 
-        .disclaimer {
-            margin: 2em auto;
-            padding: 1em;
-            border: 2px solid #2a1759;
-            max-width: 500px;
-            border-radius: 1em;
-            backdrop-filter: blur(20px);
-        }
-
         .cover {
             margin: 2em;
             padding: 1em;
@@ -194,13 +195,6 @@
             box-shadow: inset 0 0 .5em #249ef5aa, 0 0 .75em #249ef5aa;
             border-radius: 1em;
             backdrop-filter: blur(20px);
-        }
-
-        .developed-by {
-            margin-bottom: 2em;
-        }
-        .translated-by {
-            margin-top: .5em;
         }
 
         input {
@@ -221,16 +215,6 @@
         input:focus {
             outline: none;
             border-color: #baacde;
-        }
-
-        .jsdos-key {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            color: white;
-            text-align: center;
         }
 
         .warning {
@@ -495,21 +479,9 @@
             }
         }
 
-        #follow {
-            color: white;
-            font-weight: bold;
-        }
-        .follow-container {
-            margin-top: -30px;
-            margin-bottom: 20px;
-        }
         .disabled {
             opacity: 0.4;
             filter: grayscale(100%);
-        }
-        #demo-off-disclaimer {
-            font-size: 0.7em;
-            margin-top: 2px;
         }
     </style>
 </head>
@@ -555,51 +527,15 @@
             
             <div class="click-to-play">
                 <button id="click-to-play-button">Click to play</button>
-                <div id="demo-off-disclaimer"></div>
+            </div>
+            <div class="fps-setting">
+                <label for="fps-input">Max FPS:</label>
+                <input type="number" id="fps-input" value="30" min="15" max="60" step="5">
             </div>
         </div>
 
-        <div class="follow-container"><a id="follow" href="https://t.me/gamebase54" target="_blank">Подписывайтесь на новости и релизы</a></div>
-        <div class="jsdos-key">
-            <div>
-                <span><a id="cloud-saves-link" href="https://v8.js-dos.com/key" target="_blank">Cloud saves:</a></span>
-                <span id="cloud-saves-status" class="jsdos-key-status">checking...</span>
-            </div>
 
-            <input type="text" class="jsdos-key-input" placeholder="Enter js-dos key (5 len)">
-        </div>
 
-        <div class="disclaimer">
-            <span id="disclaimer-text" class="warning">DISCLAIMER:</span>
-            <span class="eula">
-                <span id="disclaimer-sources">
-                    This game is based on an open source version of GTA: Vice City. It is not a commercial release and
-                    is not affiliated with Rockstar Games.
-                </span>
-                (<a href="https://github.com/SugaryHull/re3/tree/miami" target="_blank">github</a>)
-
-                <p id="play-demo-text" class="warning">You can play the DEMO version, or provide the original
-                    game files to continue playing.</p>
-                <p style="margin-bottom: 0;">
-                    <input type="checkbox" id="disclaimer-checkbox">
-                    <label id="disclaimer-checkbox-label" for="disclaimer-checkbox">I own the original game</label>
-                </p>
-            </span>
-        </div>
-
-        <div class="developed-by">
-            <span id="port-by">HTML5 port by:</span>
-            <a href="https://github.com/okhmanyuk-ev" target="_blank">@specialist003</a>,
-            <a href="https://www.youtube.com/caiiiycuk" target="_blank">@caiiiycuk</a>,
-            <a href="https://t.me/ser_var" target="_blank">@SerGen</a>
-
-            <div style="margin-top: 0.5em;">
-                <span>Deobfuscated by: <a href="https://github.com/Lolendor" target="_blank">@Lolendor</a></span>
-            </div>
-            <div>
-                <span>Repo: <a href="https://github.com/Lolendor/reVCDOS" target="_blank">GitHub (Lolendor/reVCDOS)</a></span> <a href="https://v13.next.forgejo.org/Lolendor/reVCDOS" target="_blank">Forgejo (Lolendor/reVCDOS)</a></span> 
-            </div>
-        </div>
     </div>
 
     <input type="file" id="original-game-file" hidden>

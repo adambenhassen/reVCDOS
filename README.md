@@ -1,34 +1,28 @@
 # GTA Vice City — HTML5 Port (DOS Zone)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13GFRIxTwVbixv0Vup9MSVXnB4SLmA3G7?usp=sharing)
-
-> **Fast Start:** Run the server in one click using Google Colab. Click the badge above, run the cell, and use the **"Launch Game"** button. The tunnel password will be copied automatically — just paste it on the page that opens.
-
 Web-based port of GTA: Vice City running in browser via WebAssembly.
+
+> **Fast Start:** `go run server.go` or `docker compose up -d --build`  then open http://localhost:8000
 
 ## Requirements
 
-- Colab or Docker or Python 3.8+ or PHP 8.0+
-- Dependencies from `requirements.txt`
+- Docker (recommended) or Go 1.25+
 
 ## Quick Start
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/Lolendor/reVCDOS.git
+    git clone https://github.com/adambenhassen/reVCDOS.git
     cd reVCDOS
     ```
 
 2. **Configure Assets** (Optional):
 
-   By default, the project uses the **DOS Zone CDN**. For local hosting, download and place assets in [(see structure)](#project-structure):
-    *   **Resources:** `vcsky/fetched/` (or `fetched-ru/`) — `data`, `audio`, `anim`, `models` folders.
-    *   **Binaries:** `vcbr/` — `.wasm.br` and `.data.br` files for your chosen language.
+   By default, the project uses the **DOS Zone CDN**. For fully offline/local hosting, see [Offline Setup](#offline-setup) below.
 4. **Launch the Application**:
    Choose one of the setup methods below:
    * **Docker** (Recommended for most users) — fast and isolated.
-   * **PHP** — Simply upload the folder to your web server (FTP/Hosting).
-   * **Manual Installation** — for development and customization.
+   * **Go** — Single binary, no dependencies.
 
 ## Setup & Running
 
@@ -36,176 +30,107 @@ Web-based port of GTA: Vice City running in browser via WebAssembly.
 The easiest way to get started is using Docker Compose:
 
 ```bash
-VCSKY_CACHE=1 VCBR_CACHE=1 docker compose up -d --build
+docker compose up -d --build
 ```
 
 To configure server options via environment variables:
 
 ```bash
-# Set port, enable auth and custom saves
-IN_PORT=3000 AUTH_LOGIN=admin AUTH_PASSWORD=secret CUSTOM_SAVES=1 docker compose up -d --build
+# Enable auth and pre-download all assets
+AUTH_LOGIN=admin AUTH_PASSWORD=secret DOWNLOAD_CACHE=1 docker compose up -d --build
 ```
 
 | Environment Variable | Description |
 |---------------------|-------------|
-| `OUT_HOST` | External host (default: 0.0.0.0) |
-| `OUT_PORT` | External port (default: 8000) |
-| `IN_PORT` | Internal container port (default: 8000) |
+| `PORT` | Server port (default: 8000) |
 | `AUTH_LOGIN` | HTTP Basic Auth username |
 | `AUTH_PASSWORD` | HTTP Basic Auth password |
-| `CUSTOM_SAVES` | Enable local saves (set to `1`) |
-| `VCSKY_LOCAL` | Serve vcsky from local directory (set to `1`) |
-| `VCBR_LOCAL` | Serve vcbr from local directory (set to `1`) |
-| `VCSKY_URL` | Custom vcsky proxy URL |
-| `VCBR_URL` | Custom vcbr proxy URL |
-| `VCSKY_CACHE` | Cache vcsky files locally while proxying (set to `1`) |
-| `VCBR_CACHE` | Cache vcbr files locally while proxying (set to `1`) |
+| `CDN` | Custom CDN base URL (default: `https://cdn.dos.zone/vcsky/`) |
+| `DOWNLOAD_CACHE` | Download all assets in background on startup (set to `1` or `true`) |
+| `WORKERS` | Number of parallel download workers (default: 8) |
 
-### Option 2: Local Installation
+### Option 2: Go Server (Recommended for local)
 
-1. Install Python dependencies:
 ```bash
-pip install -r requirements.txt
+go run server.go
 ```
 
-2. Start the server:
-```bash
-python server.py --vcsky_cache --vcbr_cache
-```
+Server starts at `http://localhost:8000`. Assets are proxied from CDN and cached locally.
 
-Server starts at `http://localhost:8000`
+> **Note:** Use `go build -o server-go server.go` to create a single binary with all assets embedded.
 
-### Option 3: Shared Hosting on PHP (No installation)
-
-If you want to run the game from a hosted environment with `PHP 8.0` or above, just copy the contents of this repo to your desired hosting
-By default the `index.php` and `.htaccess` will get the job done. 
-## Server Options
+## Server Options (Go)
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `--port` | int | 8000 | Server port |
-| `--custom_saves` | flag | disabled | Enable local save files (saves router) |
-| `--login` | string | none | HTTP Basic Auth username |
-| `--password` | string | none | HTTP Basic Auth password |
-| `--vcsky_local` | flag | disabled | Serve vcsky from local `vcsky/` directory |
-| `--vcbr_local` | flag | disabled | Serve vcbr from local `vcbr/` directory |
-| `--vcsky_url` | string | `https://cdn.dos.zone/vcsky/` | Custom vcsky proxy URL |
-| `--vcbr_url` | string | `https://br.cdn.dos.zone/vcsky/` | Custom vcbr proxy URL |
-| `--vcsky_cache` | flag | disabled | Cache vcsky files locally while proxying |
-| `--vcbr_cache` | flag | disabled | Cache vcbr files locally while proxying |
+| `-port` | int | 8000 | Server port |
+| `-login` | string | none | HTTP Basic Auth username |
+| `-password` | string | none | HTTP Basic Auth password |
+| `-cdn` | string | `https://cdn.dos.zone/vcsky/` | CDN base URL |
+| `-download` | flag | disabled | Download all assets and exit |
+| `-download-cache` | flag | disabled | Download all assets in background while serving |
+| `-workers` | int | 8 | Number of parallel download workers |
 
 **Examples:**
 ```bash
 # Start on custom port
-python server.py --port 3000
-
-# Enable local saves
-python server.py --custom_saves
+go run server.go -port 3000
 
 # Enable HTTP Basic Authentication
-python server.py --login admin --password secret123
+go run server.go -login admin -password secret123
 
-# Use local vcsky and vcbr files (fully offline mode)
-python server.py --vcsky_local --vcbr_local
+# Download all assets for offline use
+go run server.go -download
 
-# Use custom proxy URLs
-python server.py --vcsky_url https://my-cdn.example.com/vcsky/ --vcbr_url https://my-cdn.example.com/vcbr/
+# Start server and download assets in background
+go run server.go -download-cache
 
-# Cache files locally while proxying (hybrid mode) (recommended)
-python server.py --vcsky_cache --vcbr_cache
-
-# All options combined
-python server.py --port 3000 --custom_saves --login admin --password secret123 --vcsky_local --vcbr_local
+# Use custom CDN
+go run server.go -cdn https://my-cdn.example.com/vcsky/
 ```
 
-> **Note:** HTTP Basic Auth is only enabled when both `--login` and `--password` are provided.
+> **Note:** HTTP Basic Auth is only enabled when both `-login` and `-password` are provided.
 
-> **Note:** By default, vcsky and vcbr are proxied from DOS Zone CDN. Use `--vcsky_local` and `--vcbr_local` flags to serve files from local directories instead.
-
-> **Note:** Use `--vcsky_cache` and `--vcbr_cache` to cache proxied files locally. Files are downloaded once and served from local storage on subsequent requests.
+> **Note:** Assets are proxied from CDN and cached locally in `vcsky/` directory. Use `-download` to pre-download all assets for fully offline play.
 
 ## URL Parameters
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `lang` | `en`, `ru` | Game language |
+| `lang` | `en` | Game language |
 | `cheats` | `1` | Enable cheat menu (F3) |
 | `request_original_game` | `1` | Request original game files before play |
 | `fullscreen` | `0` | Disable auto-fullscreen |
 | `max_fps` | `1-240` | Limit frame rate (e.g., `60` for 60 FPS) |
 
 
-**Examples:**
-- `http://localhost:8000/?lang=ru` — Russian version
+**Example:**
 - `http://localhost:8000/?lang=en&cheats=1` — English + cheats
 
 ## Project Structure
 
 ```
-├── server.py           # FastAPI proxy server
-├── index.php           # php proxy server
-├── .htaccess           # apache config for php
-├── requirements.txt    # Python dependencies
-├── additions/          # Server extensions
-│   ├── auth.py         # HTTP Basic Auth middleware
-│   ├── cache.py        # Proxy caching and brotli decompression
-│   └── saves.py        # Local saves router
-├── dist/               # Game client files
+├── server.go           # Go HTTP server
+├── dist/               # Game client files (embedded in Go binary)
 │   ├── index.html      # Main page
 │   ├── game.js         # Game loader
-│   ├── index.js        # Module loader
-│   ├── GamepadEmulator.js  # Touch controls
-│   ├── idbfs.js        # IndexedDB filesystem
-│   ├── jsdos-cloud-sdk.js  # Cloud saves (DOS Zone)
-│   ├── jsdos-cloud-sdk-local.js  # Local saves (--custom_saves)
+│   ├── streaming_files.txt  # List of streaming assets
 │   └── modules/        # WASM modules
-│       ├── runtime.js      # WASM runtime initialization
-│       ├── loader.js       # Asset/package loading
-│       ├── fs.js           # Virtual filesystem
-│       ├── audio.js        # Audio system
-│       ├── graphics.js     # Rendering pipeline
-│       ├── events.js       # Input events handling
-│       ├── fetch.js        # Network requests (Real-time asset streaming)
-│       ├── syscalls.js     # System calls
-│       ├── main.js         # Main entry point
-│       ├── cheats.js       # Cheat engine (F3)
-│       ├── asm_consts/     # Language-specific ASM constants
-│       │   ├── en.js
-│       │   └── ru.js
-│       └── packages/       # Language-specific data packages
-│           ├── en.js
-│           └── ru.js
-├── vcbr/               # Brotli-compressed game data (optional)
-│   ├── vc-sky-en-v6.data.br
-│   ├── vc-sky-en-v6.wasm.br
-│   ├── vc-sky-ru-v6.data.br
-│   └── vc-sky-ru-v6.wasm.br
-└── vcsky/                 # Decompressed assets (optional)
-    ├── fetched/           # English version files
-    │   ├── data/
-    │   ├── audio/
-    │   ├── models/
-    │   └── anim/
-    └── fetched-ru/        # Russian version files
-        ├── data/
-        ├── audio/
-        └── ...
+└── vcsky/              # Cached assets (created automatically)
+    └── fetched/        # Streaming assets from CDN
+        ├── models/
+        │   └── gta3.img/   # 4310 model/texture files
+        └── audio/
+            └── sfx.raw/    # 0.mp3 - 9940.mp3 sound effects
 ```
 
 ## Features
 
-- 🎮 Gamepad emulation for touch devices
-- ☁️ Cloud saves via js-dos key
-- 💾 Local saves (with `--custom_saves` flag)
-- 🌍 English/Russian language support
-- 🔧 Built-in cheat engine (memory scanner, cheats)
-- 📱 Mobile touch controls
-
-## Local Saves
-
-When local saves are enabled (`--custom_saves` flag), enter any 5-character identifier in the "js-dos key" input field on the start page. This identifier will be used to store your saves in the `saves/` directory on the server.
-
-Example: Enter `mykey` or `12345` — saves will be stored as `mykey_vcsky.saves` or `12345_vcsky.saves`.
+- Gamepad emulation for touch devices
+- Cloud saves via js-dos key
+- English/Russian language support
+- Built-in cheat engine (memory scanner, cheats)
+- Mobile touch controls
 
 ## Controls (Touch)
 
@@ -218,25 +143,27 @@ Enable with `?cheats=1`, press **F3** to open menu:
 - All classic GTA VC cheats
 - AirBreak (noclip mode)
 
+## Offline Setup
+
+For fully offline play without CDN dependency, download all assets using the `-download` flag:
+
+```bash
+# Build and download all assets
+go run server.go -download
+```
+
+This downloads:
+- ~4310 model/texture files (~150MB)
+- ~9940 sound effect files (~50MB)
+
+Assets are cached in `vcsky/fetched/` and served locally on subsequent requests.
+
 ## License
 
-MIT. Do what you want (but credit the port authors and me). Not affiliated with Rockstar Games.
+MIT.
 
 ---
 
 **Authors:** DOS Zone ([@specialist003](https://github.com/okhmanyuk-ev), [@caiiiycuk](https://www.youtube.com/caiiiycuk), [@SerGen](https://t.me/ser_var))
 
 **Deobfuscated by**: [@Lolendor](https://github.com/Lolendor)
-
-**Russian translation:** [GamesVoice](https://www.gamesvoice.ru/)
-
-**Added by the community:**
-* PHP Support by [Rohamgames](https://github.com/Rohamgames)
-
-## Support [me](https://github.com/Lolendor)
-
-If you find this project useful:
-
-- **TON / USDT (TON)**  `UQAyBchGEKi9NnNQ3AKMQMuO-SGEhMIAKFAbkwwrsiOPj9Gy`
-- **ETH / USDT (ERC-20)** `0x69Ec02715cF65538Bb03725F03Bd4c85D33F8AC0`
-- **TRX / USDT (TRC-20)** `THgNWT9MGW52tF8qFHbAWN25UR6WTeLDMY`

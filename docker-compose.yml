@@ -3,33 +3,15 @@ services:
     hostname: reVCDOS
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     ports:
-      - "${OUT_HOST-0.0.0.0}:${OUT_PORT-8000}:${IN_PORT-8000}"
+      - "0.0.0.0:${PORT:-8000}:8000"
     volumes:
-      - .:/app
-    networks:
-      - default
+      - ./vcsky:/app/vcsky
     environment:
       - AUTH_LOGIN=${AUTH_LOGIN:-}
       - AUTH_PASSWORD=${AUTH_PASSWORD:-}
-      - CUSTOM_SAVES=${CUSTOM_SAVES:-}
-      - IN_PORT=${IN_PORT:-8000}
-      - VCSKY_LOCAL=${VCSKY_LOCAL:-}
-      - VCBR_LOCAL=${VCBR_LOCAL:-}
-      - VCSKY_URL=${VCSKY_URL:-}
-      - VCBR_URL=${VCBR_URL:-}
-      - VCSKY_CACHE=${VCSKY_CACHE:-}
-      - VCBR_CACHE=${VCBR_CACHE:-}
-    command: > 
-      sh -c "python server.py
-      --port $${IN_PORT:-8000}
-      $$([ -n \"$$AUTH_LOGIN\" ] && [ -n \"$$AUTH_PASSWORD\" ] && echo \"--login $$AUTH_LOGIN --password $$AUTH_PASSWORD\" || echo '')
-      $$([ \"$$CUSTOM_SAVES\" = '1' ] && echo '--custom_saves' || echo '')
-      $$([ \"$$VCSKY_LOCAL\" = '1' ] && echo '--vcsky_local' || echo '')
-      $$([ \"$$VCBR_LOCAL\" = '1' ] && echo '--vcbr_local' || echo '')
-      $$([ -n \"$$VCSKY_URL\" ] && echo \"--vcsky_url $$VCSKY_URL\" || echo '')
-      $$([ -n \"$$VCBR_URL\" ] && echo \"--vcbr_url $$VCBR_URL\" || echo '')
-      $$([ \"$$VCSKY_CACHE\" = '1' ] && echo '--vcsky_cache' || echo '')
-      $$([ \"$$VCBR_CACHE\" = '1' ] && echo '--vcbr_cache' || echo '')"
+      - CDN=${CDN:-}
+      - DOWNLOAD_CACHE=${DOWNLOAD_CACHE:-}
+      - WORKERS=${WORKERS:-}
     restart: unless-stopped
