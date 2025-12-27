@@ -39,6 +39,7 @@ var (
 	login         string
 	password      string
 	cdn           string
+	downloadDir   string
 	download      bool
 	downloadCache bool
 	workers       int
@@ -57,6 +58,7 @@ func init() {
 	flag.StringVar(&login, "login", "", "HTTP Basic Auth username")
 	flag.StringVar(&password, "password", "", "HTTP Basic Auth password")
 	flag.StringVar(&cdn, "cdn", "https://cdn.dos.zone/vcsky/", "CDN base URL")
+	flag.StringVar(&downloadDir, "dir", "", "Asset cache directory (defaults to OS temp folder)")
 	flag.BoolVar(&download, "download", false, "Download all assets and exit")
 	flag.BoolVar(&downloadCache, "download-cache", false, "Download all assets to cache in the background")
 	flag.IntVar(&workers, "workers", 8, "Number of parallel download workers")
@@ -78,6 +80,9 @@ func loadEnvConfig() {
 	if v := os.Getenv("CDN"); v != "" {
 		cdn = v
 	}
+	if v := os.Getenv("DOWNLOAD_DIR"); v != "" {
+		downloadDir = v
+	}
 	if v := os.Getenv("DOWNLOAD_CACHE"); v == "1" || v == "true" {
 		downloadCache = true
 	}
@@ -91,6 +96,16 @@ func loadEnvConfig() {
 func main() {
 	flag.Parse()
 	loadEnvConfig()
+
+	// Default to OS temp folder if not set
+	if downloadDir == "" {
+		downloadDir = filepath.Join(os.TempDir(), "reVCDOS")
+	}
+
+	// Validate cache directory is usable
+	if err := os.MkdirAll(downloadDir, 0755); err != nil {
+		log.Fatalf("Cannot create cache directory %s: %v", downloadDir, err)
+	}
 
 	// Download and exit
 	if download {
@@ -137,6 +152,7 @@ func main() {
 
 	fmt.Printf("Starting server on http://localhost:%d\n", port)
 	fmt.Printf("cdn: %s\n", cdn)
+	fmt.Printf("cache: %s\n", downloadDir)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), handler))
 }
@@ -285,7 +301,15 @@ func serveIndex(w http.ResponseWriter, _ *http.Request) {
 
 func handleVcsky(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/vcsky/")
-	localPath := filepath.Join("vcsky", path)
+
+	// Validate path to prevent directory traversal
+	if strings.Contains(path, "..") {
+		log.Printf("Path traversal attempt blocked: %s", r.URL.Path)
+		http.NotFound(w, r)
+		return
+	}
+
+	localPath := filepath.Join(downloadDir, path)
 
 	// Try local file first
 	if serveLocalFile(w, r, localPath) {
@@ -642,7 +666,7 @@ func doDownloadAssets() error {
 	log.Printf("Loaded %d files from streaming_files.txt", len(files))
 
 	baseURL := strings.TrimSuffix(cdn, "/") + "/fetched/models/gta3.img"
-	outputDir := "vcsky/fetched/models/gta3.img"
+	outputDir := filepath.Join(downloadDir, "fetched/models/gta3.img")
 
 	return downloadWithWorkers(files, baseURL, outputDir, "assets")
 }
@@ -653,7 +677,7 @@ func doDownloadAudio() error {
 	// Radio stations
 	radioFiles := []string{"kchat.adf", "vcpr.adf", "fever.adf", "vrock.adf", "wave.adf", "emotion.adf", "espant.adf"}
 	baseURL := strings.TrimSuffix(cdn, "/") + "/fetched/audio"
-	outputDir := "vcsky/fetched/audio"
+	outputDir := filepath.Join(downloadDir, "fetched/audio")
 
 	log.Printf("Downloading %d radio stations...", len(radioFiles))
 	if err := downloadWithWorkers(radioFiles, baseURL, outputDir, "radio"); err != nil {
@@ -667,7 +691,7 @@ func doDownloadAudio() error {
 	}
 
 	log.Printf("Downloading %d SFX files...", len(sfxFiles))
-	return downloadWithWorkers(sfxFiles, baseURL+"/sfx.raw", outputDir+"/sfx.raw", "sfx")
+	return downloadWithWorkers(sfxFiles, baseURL+"/sfx.raw", filepath.Join(outputDir, "sfx.raw"), "sfx")
 }
 
 func downloadWithWorkers(files []string, baseURL, outputDir, label string) error {
@@ -715,8 +739,13 @@ func downloadWithWorkers(files []string, baseURL, outputDir, label string) error
 	// Wait for completion
 	wg.Wait()
 
+	failedCount := failed.Load()
 	log.Printf("[%s] Done: %d total (downloaded: %d, skipped: %d, failed: %d)",
-		label, total, downloaded.Load(), skipped.Load(), failed.Load())
+		label, total, downloaded.Load(), skipped.Load(), failedCount)
+
+	if failedCount > 0 {
+		return fmt.Errorf("%d of %d %s files failed to download", failedCount, total, label)
+	}
 
 	return nil
 }

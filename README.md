@@ -40,6 +40,7 @@ docker compose up -d --build
 | `AUTH_LOGIN` | — | Username for Basic Auth |
 | `AUTH_PASSWORD` | — | Password for Basic Auth |
 | `CDN` | `https://cdn.dos.zone/vcsky/` | Asset CDN URL |
+| `DOWNLOAD_DIR` | — | Asset cache directory (defaults to OS temp folder) |
 | `DOWNLOAD_CACHE` | `false` | Pre-download assets on startup (`1` or `true`) |
 | `WORKERS` | `8` | Parallel download threads |
 
@@ -64,6 +65,7 @@ go run server.go
 | `-login` | — | Basic Auth username |
 | `-password` | — | Basic Auth password |
 | `-cdn` | `https://cdn.dos.zone/vcsky/` | Asset CDN URL |
+| `-dir` | — | Asset cache directory (defaults to OS temp folder) |
 | `-download` | — | Download all assets and exit |
 | `-download-cache` | — | Download assets in background while serving |
 | `-workers` | `8` | Parallel download threads |
@@ -126,7 +128,7 @@ This fetches:
 - 📦 ~4,310 model/texture files (~150MB)
 - 🔊 ~9,940 sound effects (~50MB)
 
-Assets are cached in `vcsky/fetched/` for future use.
+Assets are cached in the OS temp folder (or custom `-dir` path) for future use.
 
 ---
 
@@ -134,15 +136,11 @@ Assets are cached in `vcsky/fetched/` for future use.
 
 ```
 ├── server.go              # 🖥️ Go HTTP server
-├── dist/                  # 🎮 Game client files
-│   ├── index.html         # Main page
-│   ├── game.js            # Game loader
-│   ├── streaming_files.txt
-│   └── modules/           # WASM modules
-└── vcsky/                 # 📦 Cached assets (auto-created)
-    └── fetched/
-        ├── models/gta3.img/
-        └── audio/sfx.raw/
+└── dist/                  # 🎮 Game client files
+    ├── index.html         # Main page
+    ├── game.js            # Game loader
+    ├── streaming_files.txt
+    └── modules/           # WASM modules
 ```
 
 ---

@@ -6,12 +6,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "0.0.0.0:${PORT:-8000}:8000"
-    volumes:
-      - ./vcsky:/app/vcsky
     environment:
       - AUTH_LOGIN=${AUTH_LOGIN:-}
       - AUTH_PASSWORD=${AUTH_PASSWORD:-}
       - CDN=${CDN:-}
+      - DOWNLOAD_DIR=${DOWNLOAD_DIR:-}
       - DOWNLOAD_CACHE=${DOWNLOAD_CACHE:-}
       - WORKERS=${WORKERS:-}
     restart: unless-stopped
